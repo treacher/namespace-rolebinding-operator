@@ -1,0 +1,51 @@
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: namespace-rolebinding-operator
+  namespace: kube-system
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: namespace-rolebinding-operator
+rules:
+  - apiGroups: [""]
+    resources:
+      - namespaces
+    verbs: ["get", "watch", "list"]
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: namespace-rolebinding-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: admin
+subjects:
+- kind: ServiceAccount
+  name: namespace-rolebinding-operator
+  namespace: kube-system
+
+---
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: namespace-rolebinding-operator
+  namespace: kube-system
+  labels:
+    k8s-app: namespace-rolebinding-operator
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: namespace-rolebinding-operator
+    spec:
+      serviceAccountName: namespace-rolebinding-operator
+      containers:
+      - image: galkon/namespace-rolebinding-operator:201708291842
+        name: namespace-rolebinding-operator

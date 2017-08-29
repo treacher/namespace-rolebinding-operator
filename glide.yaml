@@ -1,0 +1,3 @@
+package: github.com/treacher/namespace-rolebinding-operator
+import:
+- package: k8s.io/client-go
