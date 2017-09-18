@@ -1,6 +1,6 @@
 OPERATOR_NAME  := namespace-rolebinding-operator
 VERSION := $(shell date +%Y%m%d%H%M)
-IMAGE := galkon/$(OPERATOR_NAME)
+IMAGE := treacher/$(OPERATOR_NAME)
 
 .PHONY: install_deps build build-image
 
