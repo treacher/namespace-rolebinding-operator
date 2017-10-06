@@ -25,6 +25,15 @@ func main() {
 
 	wg := &sync.WaitGroup{} // Goroutines can add themselves to this to be waited on so that they finish
 
+	go func() {
+		<-sigs // Wait for signals (this hangs until a signal arrives)
+
+		log.Printf("Shutting down...")
+
+		close(stop) // Tell goroutines to stop themselves
+		wg.Wait()   // Wait for all to be stopped
+	}()
+
 	runOutsideCluster := flag.Bool("run-outside-cluster", false, "Set this flag when running outside of the cluster.")
 	flag.Parse()
 	// Create clientset for interacting with the kubernetes cluster
@@ -35,12 +44,6 @@ func main() {
 	}
 
 	controller.NewNamespaceController(clientset).Run(stop, wg)
-
-	<-sigs // Wait for signals (this hangs until a signal arrives)
-	log.Printf("Shutting down...")
-
-	close(stop) // Tell goroutines to stop themselves
-	wg.Wait()   // Wait for all to be stopped
 }
 
 func newClientSet(runOutsideCluster bool) (*kubernetes.Clientset, error) {
