@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"k8s.io/api/core/v1"
-	"k8s.io/api/rbac/v1beta1"
+	v1beta1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
@@ -45,10 +45,10 @@ func NewNamespaceController(kclient *kubernetes.Clientset) *NamespaceController 
 	namespaceInformer := cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
-				return kclient.Core().Namespaces().List(options)
+				return kclient.CoreV1().Namespaces().List(options)
 			},
 			WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
-				return kclient.Core().Namespaces().Watch(options)
+				return kclient.CoreV1().Namespaces().Watch(options)
 			},
 		},
 		&v1.Namespace{},
@@ -73,7 +73,7 @@ func (c *NamespaceController) createRoleBinding(obj interface{}) {
 	roleBinding := &v1beta1.RoleBinding{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "RoleBinding",
-			APIVersion: "rbac.authorization.k8s.io/v1beta1",
+			APIVersion: "rbac.authorization.k8s.io/v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      fmt.Sprintf("ad-kubernetes-%s", namespaceName),
@@ -92,7 +92,7 @@ func (c *NamespaceController) createRoleBinding(obj interface{}) {
 		},
 	}
 
-	_, err := c.kclient.Rbac().RoleBindings(namespaceName).Create(roleBinding)
+	_, err := c.kclient.RbacV1().RoleBindings(namespaceName).Create(roleBinding)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Failed to create Role Binding: %s", err.Error()))
